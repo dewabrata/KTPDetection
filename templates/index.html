@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>KTP Detection - Verifikasi KTP Indonesia</title>
+    <link rel="stylesheet" href="/static/css/style.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <header class="header">
+            <div class="header-content">
+                <div class="logo">
+                    <i class="fas fa-id-card"></i>
+                    <h1>KTP Detection</h1>
+                </div>
+                <p class="subtitle">Sistem Verifikasi dan Ekstraksi Data KTP Indonesia</p>
+            </div>
+        </header>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Upload Section -->
+            <section class="upload-section">
+                <div class="upload-card">
+                    <div class="upload-header">
+                        <i class="fas fa-cloud-upload-alt"></i>
+                        <h2>Upload Foto KTP</h2>
+                        <p>Pilih file gambar KTP Indonesia untuk diverifikasi</p>
+                    </div>
+
+                    <form id="uploadForm" enctype="multipart/form-data">
+                        <div class="file-input-container">
+                            <input type="file" id="ktpFile" name="file" accept="image/*" required>
+                            <label for="ktpFile" class="file-input-label">
+                                <i class="fas fa-plus"></i>
+                                <span>Pilih File Gambar</span>
+                                <small>JPG, PNG, WebP, BMP (Max: 10MB)</small>
+                            </label>
+                        </div>
+
+                        <div class="preview-container" id="previewContainer" style="display: none;">
+                            <img id="imagePreview" alt="Preview">
+                            <div class="preview-info">
+                                <span id="fileName"></span>
+                                <span id="fileSize"></span>
+                            </div>
+                        </div>
+
+                        <button type="submit" id="submitBtn" class="submit-btn" disabled>
+                            <i class="fas fa-search"></i>
+                            Verifikasi KTP
+                        </button>
+                    </form>
+                </div>
+            </section>
+
+            <!-- Loading Section -->
+            <section class="loading-section" id="loadingSection" style="display: none;">
+                <div class="loading-card">
+                    <div class="loader"></div>
+                    <h3>Memproses Gambar KTP...</h3>
+                    <p id="loadingText">Menganalisis dengan AI...</p>
+                    <div class="progress-bar">
+                        <div class="progress-fill" id="progressFill"></div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Result Section -->
+            <section class="result-section" id="resultSection" style="display: none;">
+                <!-- Success Result -->
+                <div class="result-card success" id="successResult" style="display: none;">
+                    <div class="result-header success">
+                        <i class="fas fa-check-circle"></i>
+                        <h3>KTP Valid Terverifikasi</h3>
+                        <div class="confidence-score">
+                            <span>Confidence Score: </span>
+                            <span id="confidenceScore" class="score-value">95%</span>
+                        </div>
+                    </div>
+
+                    <div class="ktp-data">
+                        <div class="data-grid">
+                            <div class="data-item">
+                                <label>NIK:</label>
+                                <span id="dataNik" class="data-value"></span>
+                            </div>
+                            <div class="data-item">
+                                <label>Nama:</label>
+                                <span id="dataNama" class="data-value"></span>
+                            </div>
+                            <div class="data-item">
+                                <label>Tempat Lahir:</label>
+                                <span id="dataTempatLahir" class="data-value"></span>
+                            </div>
+                            <div class="data-item">
+                                <label>Tanggal Lahir:</label>
+                                <span id="dataTanggalLahir" class="data-value"></span>
+                            </div>
+                            <div class="data-item">
+                                <label>Jenis Kelamin:</label>
+                                <span id="dataJenisKelamin" class="data-value"></span>
+                            </div>
+                            <div class="data-item">
+                                <label>Alamat:</label>
+                                <span id="dataAlamat" class="data-value"></span>
+                            </div>
+                            <div class="data-item">
+                                <label>RT/RW:</label>
+                                <span id="dataRtRw" class="data-value"></span>
+                            </div>
+                            <div class="data-item">
+                                <label>Kelurahan:</label>
+                                <span id="dataKelurahan" class="data-value"></span>
+                            </div>
+                            <div class="data-item">
+                                <label>Kecamatan:</label>
+                                <span id="dataKecamatan" class="data-value"></span>
+                            </div>
+                            <div class="data-item">
+                                <label>Kabupaten/Kota:</label>
+                                <span id="dataKabupatenKota" class="data-value"></span>
+                            </div>
+                            <div class="data-item">
+                                <label>Provinsi:</label>
+                                <span id="dataProvinsi" class="data-value"></span>
+                            </div>
+                            <div class="data-item">
+                                <label>Agama:</label>
+                                <span id="dataAgama" class="data-value"></span>
+                            </div>
+                            <div class="data-item">
+                                <label>Status Perkawinan:</label>
+                                <span id="dataStatusPerkawinan" class="data-value"></span>
+                            </div>
+                            <div class="data-item">
+                                <label>Pekerjaan:</label>
+                                <span id="dataPekerjaan" class="data-value"></span>
+                            </div>
+                            <div class="data-item">
+                                <label>Kewarganegaraan:</label>
+                                <span id="dataKewarganegaraan" class="data-value"></span>
+                            </div>
+                            <div class="data-item">
+                                <label>Berlaku Hingga:</label>
+                                <span id="dataBerlakuHingga" class="data-value"></span>
+                            </div>
+                        </div>
+
+                        <!-- Face Detection Section -->
+                        <div class="face-section" id="faceSection" style="display: none;">
+                            <div class="face-header">
+                                <i class="fas fa-user-circle"></i>
+                                <h4>📸 Foto Wajah</h4>
+                            </div>
+                            <div class="face-content">
+                                <div class="face-image-container">
+                                    <img id="extractedFace" class="face-preview" alt="Foto Wajah" style="display: none;">
+                                    <div class="face-placeholder" id="facePlaceholder">
+                                        <i class="fas fa-user"></i>
+                                        <span>Foto wajah tidak tersedia</span>
+                                    </div>
+                                </div>
+                                <div class="face-info">
+                                    <div class="face-confidence">
+                                        <span>Face Confidence: </span>
+                                        <span id="faceConfidence" class="confidence-value">--</span>
+                                    </div>
+                                    <div class="face-quality">
+                                        <span id="faceQuality">--</span>
+                                    </div>
+                                    <button id="downloadFace" class="btn-download" style="display: none;">
+                                        <i class="fas fa-download"></i>
+                                        Download Foto
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="database-info" id="databaseInfo" style="display: none;">
+                            <i class="fas fa-database"></i>
+                            <span>Data berhasil disimpan ke database dengan ID: <strong id="databaseId"></strong></span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Error Result -->
+                <div class="result-card error" id="errorResult" style="display: none;">
+                    <div class="result-header error">
+                        <i class="fas fa-times-circle"></i>
+                        <h3>KTP Tidak Valid</h3>
+                    </div>
+
+                    <div class="error-details">
+                        <h4>Alasan Tidak Valid:</h4>
+                        <ul id="errorList"></ul>
+                    </div>
+
+                    <div class="error-suggestions">
+                        <h4>Saran Perbaikan:</h4>
+                        <ul>
+                            <li>Pastikan gambar KTP jelas dan tidak blur</li>
+                            <li>Pastikan seluruh area KTP terlihat dalam gambar</li>
+                            <li>Gunakan pencahayaan yang cukup</li>
+                            <li>Hindari pantulan cahaya pada permukaan KTP</li>
+                            <li>Pastikan gambar yang diupload adalah KTP Indonesia asli</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Action Buttons -->
+                <div class="action-buttons">
+                    <button type="button" id="uploadAnotherBtn" class="btn secondary">
+                        <i class="fas fa-upload"></i>
+                        Upload Gambar Lain
+                    </button>
+                    <button type="button" id="copyDataBtn" class="btn primary" style="display: none;">
+                        <i class="fas fa-copy"></i>
+                        Salin Data JSON
+                    </button>
+                </div>
+            </section>
+        </main>
+
+        <!-- Footer -->
+        <footer class="footer">
+            <div class="footer-content">
+                <div class="footer-info">
+                    <p>&copy; 2025 KTP Detection System. Powered by Gemini Flash 2.5 AI.</p>
+                    <div class="tech-stack">
+                        <span class="tech-item">FastAPI</span>
+                        <span class="tech-item">Google AI</span>
+                        <span class="tech-item">MariaDB</span>
+                        <span class="tech-item">Face Detection</span>
+                    </div>
+                </div>
+                <div class="footer-links">
+                    <a href="/docs" target="_blank">
+                        <i class="fas fa-book"></i>
+                        API Docs
+                    </a>
+                    <a href="/health" target="_blank">
+                        <i class="fas fa-heartbeat"></i>
+                        Health Check
+                    </a>
+                </div>
+            </div>
+        </footer>
+    </div>
+
+    <!-- Toast Notification -->
+    <div class="toast" id="toast">
+        <div class="toast-content">
+            <i class="toast-icon"></i>
+            <span class="toast-message"></span>
+        </div>
+    </div>
+
+    <script src="/static/js/app.js"></script>
+</body>
+</html>
